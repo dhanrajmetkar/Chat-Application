@@ -1,27 +1,29 @@
 package com.chatApp.ChatApplication.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class GroupOfUser {
+    Boolean isPublic;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(unique = true)
     private String name;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "admin_id", referencedColumnName = "id")
+    @ManyToOne
+    @JsonBackReference
     private User admin;
     @ManyToMany(mappedBy = "groups")
+    @JsonBackReference
     private Set<User> users;
 
 }

@@ -1,14 +1,13 @@
 package com.chatApp.ChatApplication.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -22,7 +21,7 @@ public class User {
     private String email;
     private String password;
     private String role;
-    private boolean isEnabled;
+    private boolean enabled;
 
     @ManyToMany()
     @JoinTable(
@@ -30,6 +29,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "user_group_id", referencedColumnName = "id")
     )
+    @JsonManagedReference
     private Set<GroupOfUser> groups;
 
 }
