@@ -13,7 +13,8 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class GroupOfUser {
-    Boolean isPublic;
+
+    Boolean isPublic = false;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

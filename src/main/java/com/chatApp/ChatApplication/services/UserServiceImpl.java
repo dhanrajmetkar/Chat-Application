@@ -1,6 +1,7 @@
 package com.chatApp.ChatApplication.services;
 
 import com.chatApp.ChatApplication.entity.GroupOfUser;
+import com.chatApp.ChatApplication.entity.Role;
 import com.chatApp.ChatApplication.entity.User;
 import com.chatApp.ChatApplication.entity.VerificationToken;
 import com.chatApp.ChatApplication.model.UserModel;
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserService {
                 .firstname(userModel.getFirstname())
                 .lastname(userModel.getLastname())
                 .password(passwordEncoder.encode(userModel.getPassword()))
-                .role("USER")
+                .role(Role.USER)
                 .enabled(false)
                 .build();
         System.out.println(user);
@@ -49,8 +50,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> getUsers(int pageSize, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-
-//      return  userRepository.findUsersByEnabledGroups(pageable);
+        //return  userRepository.findUsersByEnabledGroups(pageable);
         return userRepository.findAll(pageable);
     }
 
@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserService {
 
         GroupOfUser userGroup = new GroupOfUser();
         userGroup.setName(groupName.trim());
+        user.setRole(Role.ADMIN);
         userGroup.setAdmin(user);
         Set<User> userSet = new HashSet<>();
         userSet.add(user);
@@ -131,6 +132,6 @@ public class UserServiceImpl implements UserService {
             groupRepository.save(groupOfUser);
             return "Group is Public now ";
         }
-        return "Incorrect Admin ";
+        return "Incorrect Admin You can not access group ";
     }
 }

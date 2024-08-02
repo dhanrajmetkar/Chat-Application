@@ -18,10 +18,14 @@ public class User {
     private Integer id;
     private String firstname;
     private String lastname;
+    @Column(
+            unique = true
+    )
     private String email;
     private String password;
-    private String role;
-    private boolean enabled;
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
+    private boolean enabled = false;
 
     @ManyToMany()
     @JoinTable(
