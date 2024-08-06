@@ -1,10 +1,12 @@
 package com.chatApp.ChatApplication.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -23,8 +25,10 @@ public class GroupOfUser {
     @ManyToOne
     @JsonBackReference
     private User admin;
-    @ManyToMany(mappedBy = "groups")
-    @JsonBackReference
-    private Set<User> users;
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER,
+            mappedBy = "groups")
+    private List<User> users;
 
 }

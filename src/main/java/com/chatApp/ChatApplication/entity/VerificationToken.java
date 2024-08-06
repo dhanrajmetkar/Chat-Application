@@ -28,18 +28,18 @@ public class VerificationToken {
     public VerificationToken(String token, User user) {
         this.token = token;
         this.user = user;
-        this.expirationTime = calculateExpirationDate(EXPIRATION_TIME);
+        this.expirationTime = calculateExpirationDate();
     }
 
     public VerificationToken(String token) {
         this.token = token;
-        this.expirationTime = calculateExpirationDate(EXPIRATION_TIME);
+        this.expirationTime = calculateExpirationDate();
     }
 
-    private Date calculateExpirationDate(int expirationTime) {
+    private Date calculateExpirationDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(new Date().getTime());
-        calendar.add(Calendar.MINUTE, expirationTime);
+        calendar.add(Calendar.MINUTE, VerificationToken.EXPIRATION_TIME);
         return new Date(calendar.getTime().getTime());
     }
 

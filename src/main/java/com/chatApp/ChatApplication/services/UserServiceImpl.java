@@ -16,9 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -50,38 +49,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> getUsers(int pageSize, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        //return  userRepository.findUsersByEnabledGroups(pageable);
         return userRepository.findAll(pageable);
     }
 
-    @Override
-    public GroupOfUser createGroup(int id, String groupName) {
-        Optional<User> users = userRepository.findById(id);
-        User user = null;
-        if (users.isPresent()) {
-            user = users.get();
-        }
-        if (user == null) {
-            throw new RuntimeException("user is null");
-        }
-        if (!user.isEnabled()) {
-            throw new RuntimeException("user not verified you cannot create group :");
-        }
 
-        GroupOfUser userGroup = new GroupOfUser();
-        userGroup.setName(groupName.trim());
-        user.setRole(Role.ADMIN);
-        userGroup.setAdmin(user);
-        Set<User> userSet = new HashSet<>();
-        userSet.add(user);
-        userGroup.setUsers(userSet);
-        groupRepository.save(userGroup);
-        Set<GroupOfUser> userGroupSet = user.getGroups();
-        userGroupSet.add(userGroup);
-        user.setGroups(userGroupSet);
-        userRepository.save(user);
-        return userGroup;
-    }
 
     @Override
     public void saveVerificationTokenForUser(String token, User user) {
@@ -105,14 +76,29 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return "valid";
     }
-
     @Override
-    public VerificationToken generateNewVerificationToken(String token) {
-        return null;
+    public GroupOfUser createGroup(int id, String groupName) {
+        Optional<User> users = userRepository.findById(id);
+        if (users.isPresent()) {
+            User user = users.get();
+            if (!user.isEnabled()) {
+                throw new RuntimeException("user not verified you cannot create group :");
+            }
+            GroupOfUser group = new GroupOfUser();
+            group.setName(groupName.trim());
+            user.setRole(Role.ADMIN);
+            group.setAdmin(user);
+            groupRepository.save(group);
+            userRepository.save(user);
+            System.out.println("in the last step");
+            return group;
+        } else {
+            throw new RuntimeException("user not found");
+        }
     }
 
     @Override
-    public Set<User> getUsersFromGroup(int groupId) {
+    public List<User> getUsersFromGroup(int groupId) {
         GroupOfUser groupOfUser = groupRepository.findById(groupId).get();
 
         return groupOfUser.getUsers();

@@ -1,10 +1,9 @@
 package com.chatApp.ChatApplication.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,7 +13,7 @@ import java.util.Set;
 @Builder
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String firstname;
     private String lastname;
@@ -27,13 +26,13 @@ public class User {
     private Role role;
     private boolean enabled = false;
 
-    @ManyToMany()
+    @ManyToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_group_table",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "user_group_id", referencedColumnName = "id")
+            inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id")
     )
-    @JsonManagedReference
-    private Set<GroupOfUser> groups;
+    private List<GroupOfUser> groups;
 
 }

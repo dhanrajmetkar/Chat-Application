@@ -17,7 +17,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GroupServiceImpl implements GroupService {
@@ -33,6 +35,11 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public List<GroupOfUser> getAllGroups() {
+        return groupRepository.findAll();
+    }
+
+    @Override
     public Page<GroupOfUser> getGroups(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         boolean isPublic = true;
@@ -40,103 +47,104 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public Set<GroupOfUser> getAdminGroups(int adminId) {
+    public List<GroupOfUser> getAdminGroups(int adminId) {
         User user = userRepository.findById(adminId).get();
         return groupRepository.findByAdmin(user);
     }
 
     @Override
-    public ResponseEntity<?> addMembers(AddMemberToGroupModel addMemberToGroupModel, String url) throws MessagingException, UnsupportedEncodingException {
-        User user;
-        GroupOfUser groupOfUser = null;
-        Optional<GroupOfUser> groupOfUserOptional = groupRepository.findById(addMemberToGroupModel.getGroupId());
-        if (groupOfUserOptional.isPresent()) {
-            groupOfUser = groupOfUserOptional.get();
-        } else {
-            throw new RuntimeException("group with given id not present ");
-        }
-        System.out.println(!groupOfUser.getIsPublic());
-        if (!groupOfUser.getIsPublic()) {
-            Optional<User> userOptional = userRepository.findById(addMemberToGroupModel.getAdminId());
-            if (userOptional.isPresent()) {
-                user = userOptional.get();
-            } else {
-                throw new RuntimeException("Invalid Admin Id ");
-            }
-            if (!user.getId().equals(groupOfUser.getAdmin().getId())) {
-                throw new RuntimeException("invalid admin you can not be added to this group");
-            }
-            ArrayList<String> urls = new ArrayList<>();
-            int size = addMemberToGroupModel.getUserIds().size();
-            int i = 0;
-            while (size >= 1) {
-                User user1;
-                Optional<User> userOptional1 = userRepository.findById(addMemberToGroupModel.getUserIds().get(i));
-                if (userOptional.isPresent()) {
-                    user1 = userOptional1.get();
-                } else {
-                    throw new RuntimeException("User with user id not found");
-                }
-                urls.add(url + "/admin/verifyUser?user_id=" + user1.getId() + "&group_id=" + groupOfUser.getId());
-                i++;
-                size--;
-            }
-            System.out.println(urls);
-
-            // sendMail(addMemberToGroupModel.getUserIds().toString(), urls,user);
-            return ResponseEntity.ok("You will be added to group soon once the admin will verify ");
-        } else {
-            Set<User> userSet = new HashSet<>();
-            int size = addMemberToGroupModel.getUserIds().size();
-            int i = 0;
-            while (size >= 1) {
-                User user1;
-                Optional<User> userOptional = userRepository.findById(addMemberToGroupModel.getUserIds().get(i));
-                if (userOptional.isPresent()) {
-                    user1 = userOptional.get();
-                } else {
-                    throw new RuntimeException("User with user id not found");
-                }
-                userSet.add(user1);
-                i++;
-                size--;
-            }
-            groupOfUser.setUsers(userSet);
-            return ResponseEntity.ok(groupOfUser.getUsers());
-        }
-
-
-    }
-
-    @Override
-    public Set<User> addVerifiedMembers(int userId, int groupId) {
-        User user = userRepository.findById(userId).get();
-        if (user.isEnabled()) {
-            GroupOfUser groupOfUser = groupRepository.findById(groupId).get();
-            Set<User> userSet = new HashSet<>();
-            userSet.addAll(groupOfUser.getUsers());
-            userSet.add(user);
-            groupOfUser.setUsers(userSet);
-            return groupOfUser.getUsers();
-        }
-        throw new RuntimeException("user is not verified please verify the user :");
-    }
-
-    @Override
-    public List<GroupOfUser> getAllGroups() {
-        return groupRepository.findAll();
-    }
-
-    @Override
     public List<User> getMembers(int adminId, int groupId) {
         User user = userRepository.findById(adminId).get();
-        List<User> users = new ArrayList<>();
         if (user.isEnabled()) {
             GroupOfUser groupOfUser = groupRepository.findById(groupId).get();
-            users.addAll(groupOfUser.getUsers());
-            return users;
+            return new ArrayList<>(groupOfUser.getUsers());
         }
         throw new RuntimeException("Incorrect Admin Id");
+    }
+
+    @Override
+    public ResponseEntity<?> addMembers(AddMemberToGroupModel addMemberToGroupModel, String url) throws MessagingException, UnsupportedEncodingException {
+        Optional<GroupOfUser> groupOfUserOptional = groupRepository.findById(addMemberToGroupModel.getGroupId());
+        if (groupOfUserOptional.isPresent()) {
+
+            GroupOfUser groupOfUser = groupOfUserOptional.get();
+            //checking if the group is public or not if group is private then add the members to group by finding the admin id
+            if (!groupOfUser.getIsPublic()) {
+                Optional<User> userOptional = userRepository.findById(addMemberToGroupModel.getAdminId());
+                User user;
+                if (userOptional.isPresent()) {
+                    user = userOptional.get();
+                } else {
+                    throw new RuntimeException("Invalid Admin Id ");
+                }
+                if (!user.getId().equals(groupOfUser.getAdmin().getId())) {
+                    throw new RuntimeException("invalid admin you can not be added to this group");
+                }
+                ArrayList<String> urls = new ArrayList<>();
+                int size = addMemberToGroupModel.getUserIds().size();
+                int i = 0;
+                while (size >= 1) {
+                    User user1;
+                    Optional<User> userOptional1 = userRepository.findById(addMemberToGroupModel.getUserIds().get(i));
+                    if (userOptional1.isPresent()) {
+                        user1 = userOptional1.get();
+                    } else {
+                        throw new RuntimeException("User with user id not found");
+                    }
+                    urls.add(url + "/admin/verifyUser?user_id=" + user1.getId() + "&group_id=" + groupOfUser.getId() + "&admin_id=" + groupOfUser.getAdmin().getId());
+                    i++;
+                    size--;
+                }
+                System.out.println(urls);
+                // sendMail(addMemberToGroupModel.getUserIds().toString(), urls,user);
+                return ResponseEntity.ok("You will be added to group soon once the admin will verify ");
+            } else {
+                List<User> userList = new ArrayList<>();
+                int size = addMemberToGroupModel.getUserIds().size();
+                int i = 0;
+                while (size >= 1) {
+                    User user1;
+                    Optional<User> userOptional = userRepository.findById(addMemberToGroupModel.getUserIds().get(i));
+                    if (userOptional.isPresent()) {
+                        user1 = userOptional.get();
+                        userList.add(user1);
+                    } else {
+                        throw new RuntimeException("User with user id not found");
+                    }
+                    i++;
+                    size--;
+                }
+                groupOfUser.setUsers(userList);
+                groupRepository.save(groupOfUser);
+                return ResponseEntity.ok(groupOfUser.getUsers());
+            }
+        } else {
+            throw new RuntimeException("group not found");
+        }
+    }
+
+    @Override
+    public List<User> addVerifiedMembers(int adminId, int userId, int groupId) {
+
+        Optional<GroupOfUser> groupOfUserOptional = groupRepository.findById(groupId);
+        if (groupOfUserOptional.isPresent()) {
+            GroupOfUser groupOfUser = groupOfUserOptional.get();
+            if (groupOfUser.getAdmin().getId().equals(adminId)) {
+                Optional<User> userOptional = userRepository.findById(userId);
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    groupOfUser.getUsers().add(user);
+                    user.getGroups().add(groupOfUser);
+                    groupRepository.save(groupOfUser);
+                    return List.of(user);
+                } else {
+                    throw new RuntimeException(" user not found");
+                }
+            } else {
+                throw new RuntimeException("invalid admin");
+            }
+        }
+        throw new RuntimeException("group not found with given id");
     }
 
     private void sendMail(String ids, ArrayList<String> urls, User user) throws MessagingException {

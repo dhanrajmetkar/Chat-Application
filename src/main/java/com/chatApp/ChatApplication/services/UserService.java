@@ -6,7 +6,7 @@ import com.chatApp.ChatApplication.entity.VerificationToken;
 import com.chatApp.ChatApplication.model.UserModel;
 import org.springframework.data.domain.Page;
 
-import java.util.Set;
+import java.util.List;
 
 public interface UserService {
     User registerUser(UserModel userModel);
@@ -19,9 +19,7 @@ public interface UserService {
 
     String validateVerificationToken(String token);
 
-    VerificationToken generateNewVerificationToken(String token);
-
-    Set<User> getUsersFromGroup(int groupId);
+    List<User> getUsersFromGroup(int groupId);
 
     User getUsersAdminFromGroupId(int groupId);
 

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Set;
+import java.util.List;
 
 @Repository
 public interface GroupOfUserRepository extends JpaRepository<GroupOfUser, Integer> {
@@ -15,7 +15,7 @@ public interface GroupOfUserRepository extends JpaRepository<GroupOfUser, Intege
     @Override
     Page<GroupOfUser> findAll(Pageable pageable);
 
-    Page<GroupOfUser> findByisPublic(boolean isPublic, Pageable pageable);
+    List<GroupOfUser> findByAdmin(User user);
 
-    Set<GroupOfUser> findByAdmin(User user);
+    Page<GroupOfUser> findByisPublic(boolean isPublic, Pageable pageable);
 }

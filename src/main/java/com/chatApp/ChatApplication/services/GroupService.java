@@ -9,18 +9,18 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Set;
 
 public interface GroupService {
     Page<GroupOfUser> getGroups(int pageNo, int pageSize);
 
-    Set<GroupOfUser> getAdminGroups(int adminId);
+    List<GroupOfUser> getAdminGroups(int adminId);
 
     ResponseEntity<?> addMembers(AddMemberToGroupModel addMemberToGroupModel, String url) throws MessagingException, UnsupportedEncodingException;
 
-    Set<User> addVerifiedMembers(int userId, int groupId);
+    List<User> addVerifiedMembers(int adminId, int userId, int groupId);
 
     List<GroupOfUser> getAllGroups();
 
     List<User> getMembers(int adminId, int groupId);
+
 }
