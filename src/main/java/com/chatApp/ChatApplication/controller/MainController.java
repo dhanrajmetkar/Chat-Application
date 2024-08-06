@@ -67,7 +67,7 @@ public class MainController {
     }
 
     @PostMapping("/getGroupMembers")
-    public List<User> getGroupMembers(@RequestBody GroupRequest groupRequest) {
+    public List<String> getGroupMembers(@RequestBody GroupRequest groupRequest) {
         return groupService.getMembers(groupRequest.getAdmin_id(), groupRequest.getGroup_id());
     }
 

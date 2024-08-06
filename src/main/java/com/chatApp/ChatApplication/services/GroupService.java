@@ -21,6 +21,6 @@ public interface GroupService {
 
     List<GroupOfUser> getAllGroups();
 
-    List<User> getMembers(int adminId, int groupId);
+    List<String> getMembers(int adminId, int groupId);
 
 }

@@ -53,11 +53,19 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public List<User> getMembers(int adminId, int groupId) {
+    public List<String> getMembers(int adminId, int groupId) {
+        GroupOfUser groupOfUser = groupRepository.findById(groupId).get();
         User user = userRepository.findById(adminId).get();
-        if (user.isEnabled()) {
-            GroupOfUser groupOfUser = groupRepository.findById(groupId).get();
-            return new ArrayList<>(groupOfUser.getUsers());
+        if(user.equals(groupOfUser.getAdmin())) {
+            if (user.isEnabled()) {
+                List<User> userList=groupOfUser.getUsers();
+                List<String> members = new ArrayList<>();
+                for(User user1:userList)
+                {
+                    members.add(user1.getId()+" "+user1.getFirstname()+" "+user1.getLastname());
+                }
+                return members;
+            }
         }
         throw new RuntimeException("Incorrect Admin Id");
     }
