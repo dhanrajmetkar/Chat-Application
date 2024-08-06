@@ -116,13 +116,15 @@ public class GroupServiceImpl implements GroupService {
                     if (userOptional.isPresent()) {
                         user1 = userOptional.get();
                         userList.add(user1);
+                        user1.getGroups().add(groupOfUser);
+                        userRepository.save(user1);
                     } else {
                         throw new RuntimeException("User with user id not found");
                     }
                     i++;
                     size--;
                 }
-                groupOfUser.setUsers(userList);
+                groupOfUser.getUsers().addAll(userList);
                 groupRepository.save(groupOfUser);
                 return ResponseEntity.ok(groupOfUser.getUsers());
             }

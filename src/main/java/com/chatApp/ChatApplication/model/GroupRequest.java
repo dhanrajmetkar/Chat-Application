@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @Component
 public class GroupRequest {
-    private int admin_id;
+    private int user_id;
     private int group_id;
 }

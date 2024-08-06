@@ -68,7 +68,7 @@ public class MainController {
 
     @PostMapping("/getGroupMembers")
     public List<String> getGroupMembers(@RequestBody GroupRequest groupRequest) {
-        return groupService.getMembers(groupRequest.getAdmin_id(), groupRequest.getGroup_id());
+        return groupService.getMembers(groupRequest.getUser_id(), groupRequest.getGroup_id());
     }
 
     @PostMapping("/createGroup/{user_id}/{groupName}")
@@ -77,8 +77,8 @@ public class MainController {
     }
 
     @PostMapping("/makeGroupPublic")
-    public String makeGroupPublic(@RequestParam(value = "user_id") int user_id, @RequestParam("group_id") int group_id) {
-        return userService.makaGroupPublic(user_id, group_id);
+    public String makeGroupPublic(@RequestBody GroupRequest groupRequest) {
+        return userService.makaGroupPublic(groupRequest.getUser_id(),groupRequest.getGroup_id());
     }
 
     @GetMapping("/admin/getAdminGroups/{admin_id}")
